@@ -1,0 +1,1 @@
+# autostart-vm-az-function
