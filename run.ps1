@@ -35,7 +35,6 @@ if ($running) {
     Write-Host $message
     Select-AzSubscription -SubscriptionID $subscriptionId -TenantID $tenantId
     Start-AzVM -ResourceGroupName $rsgName -Name $vmName
-    wait 10
     if ($starting) {
         Write-Host $message
         invoke-webrequest -uri $gotify_url -Method POST -Body $body
@@ -50,7 +49,6 @@ if ($running) {
         Write-Host $message
         invoke-webrequest -uri $gotify_url -Method POST -Body $body
         Start-AzVM -ResourceGroupName $rsgName -Name $vmName
-        wait 10
         $message= "$($vm.Name) is showing abnormal status to start command, current status is $($vm.Statuses[1].DisplayStatus), Requires further investigation"
         $priority = 1
         invoke-webrequest -uri $gotify_url -Method POST -Body $body
