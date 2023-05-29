@@ -6,24 +6,23 @@ param($Request, $TriggerMetadata)
 $subscriptionId = "[SubscriptionID_Paste_HERE]"
 $tenantId = "[TENANT_ID_PASTE_HERE"
 $vm=((Get-AzVM -Name 'virtual-machine-1' -ResourceGroupName 'virtual-machine-group' -Status))
+
 $rsgName = $vm.ResourceGroupName
 $vmName = $vm.Name
-
 $message= "$($vm.Name) status is $($vm.Statuses[1].DisplayStatus)"
-$running= $vm.Statuses[1].DisplayStatus -eq "VM running"
-$starting= $vm.Statuses[1].DisplayStatus -eq "VM starting"
 
 # gotify webhook notification is used here, u can change it to anything you want
 $gotify_url= "https://gotify.domain/message?token=asdsadsadsadd"
 $gotify_title = "Virtual Machine Status"
-$gotify_priority = 5
+$gotify_priority = 1
 $body = @{
     title = $title
     message = $message
     priority = $priority
 }
 
-if ($running) {
+if ($vm.Statuses[1].DisplayStatus -eq "VM running") {
+    # if it's running now, then send a notification and exit
     Write-Host $message
     invoke-webrequest -uri $gotify_url -Method POST -Body $body
     Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
@@ -32,10 +31,12 @@ if ($running) {
         })
     exit 0
 } else {
-    Write-Host $message
     Select-AzSubscription -SubscriptionID $subscriptionId -TenantID $tenantId
     Start-AzVM -ResourceGroupName $rsgName -Name $vmName
-    if ($starting) {
+    Start-Sleep -Seconds 5
+    $vm=((Get-AzVM -Name 'nhen-spot' -ResourceGroupName 'spot_vm' -Status))
+    Write-Host "$($vm.Name) status is $($vm.Statuses[1].DisplayStatus)"
+    if ($vm.Statuses[1].DisplayStatus -eq "VM starting" -or $vm.Statuses[1].DisplayStatus -eq "VM running") {
         Write-Host $message
         invoke-webrequest -uri $gotify_url -Method POST -Body $body
         Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
@@ -49,8 +50,9 @@ if ($running) {
         Write-Host $message
         invoke-webrequest -uri $gotify_url -Method POST -Body $body
         Start-AzVM -ResourceGroupName $rsgName -Name $vmName
+        Start-Sleep -Seconds 5
+        $vm=((Get-AzVM -Name 'nhen-spot' -ResourceGroupName 'spot_vm' -Status))
         $message= "$($vm.Name) is showing abnormal status to start command, current status is $($vm.Statuses[1].DisplayStatus), Requires further investigation"
-        $priority = 1
         invoke-webrequest -uri $gotify_url -Method POST -Body $body
         # exit with error code 1 and http response code 503 to indicate service unavailable
         Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
