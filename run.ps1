@@ -33,7 +33,7 @@ if ($vm.Statuses[1].DisplayStatus -eq "VM running") {
 } else {
     Select-AzSubscription -SubscriptionID $subscriptionId -TenantID $tenantId
     Start-AzVM -ResourceGroupName $rsgName -Name $vmName
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 21
     $vm=((Get-AzVM -Name 'V' -ResourceGroupName 'virtual-machine' -Status))
     Write-Host "$($vm.Name) status is $($vm.Statuses[1].DisplayStatus)"
     if ($vm.Statuses[1].DisplayStatus -eq "VM starting" -or $vm.Statuses[1].DisplayStatus -eq "VM running") {
@@ -50,7 +50,7 @@ if ($vm.Statuses[1].DisplayStatus -eq "VM running") {
         Write-Host $message
         invoke-webrequest -uri $gotify_url -Method POST -Body $body
         Start-AzVM -ResourceGroupName $rsgName -Name $vmName
-        Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 20
         $vm=((Get-AzVM -Name 'virtual-machine-1' -ResourceGroupName 'virtual-machine' -Status))
         $message= "$($vm.Name) is showing abnormal status to start command, current status is $($vm.Statuses[1].DisplayStatus), Requires further investigation"
         invoke-webrequest -uri $gotify_url -Method POST -Body $body
