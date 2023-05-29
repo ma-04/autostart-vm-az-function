@@ -6,3 +6,7 @@
 
 ##Why the convulated mess with the variables?##
 Im still learning so not sure how to resolve some of the errors that were arising with new variable input not being used
+
+
+Inspired by
+http://web.archive.org/web/20230328044754/https://edi.wang/post/2020/6/18/use-azure-function-to-schedule-auto-start-for-vms
