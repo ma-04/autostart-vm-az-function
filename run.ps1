@@ -4,61 +4,69 @@ using namespace System.Net
 param($Request, $TriggerMetadata)
 
 $subscriptionId = "[SubscriptionID_Paste_HERE]"
-$tenantId = "[TENANT_ID_PASTE_HERE"
-$vm=((Get-AzVM -Name 'virtual-machine-1' -ResourceGroupName 'virtual-machine-group' -Status))
+$tenantId = "TENANT_ID_PASTE_HERE"
 
-$rsgName = $vm.ResourceGroupName
-$vmName = $vm.Name
-$message= "$($vm.Name) status is $($vm.Statuses[1].DisplayStatus)"
+$ResourceGroupName = 'resource_group_name'
+$VMName = 'VMName'
 
-# gotify webhook notification is used here, u can change it to anything you want
-$gotify_url= "https://gotify.domain/message?token=asdsadsadsadd"
-$gotify_title = "Virtual Machine Status"
+# Optional gotify settings for notifications, if you don't want to use gotify, comment out the following 3 lines
+$gotify_url= "https://gotify.url/message?token=asdasdasdsd"
+$gotify_title = "$VMName Status"
 $gotify_priority = 1
-#$body = @{title=$gotify_title;message=$message;priority=$gotify_priority}
 
 Select-AzSubscription -SubscriptionID $subscriptionId -TenantID $tenantId
-$vm=((Get-AzVM -Name $vmName -ResourceGroupName $rsgName -Status))
-if ($vm.Statuses[1].DisplayStatus -eq "VM running") {
-    # if it's running now, then send a notification and exit
-    $message= "$vmName status is $(((Get-AzVM -Name $vmName -ResourceGroupName $rsgName -Status)).Statuses[1].DisplayStatus)"
-    Write-Host $message
-    Write-Host "VM is already running, no action taken"
-    invoke-webrequest -uri $gotify_url -Method POST -Body @{title=$gotify_title;message=$message;priority=$gotify_priority}
+
+function Get-Current-AzVMStatus {
+    $vm = Get-AzVM -ResourceGroupName $ResourceGroupName -Name $VMName -Status
+    $vm.Statuses[1].DisplayStatus
+}
+function start_vm {
+    Start-AzVM -ResourceGroupName $ResourceGroupName -Name $VMName
+}
+function status_message {
+    "$VMName status is $(Get-AzVMStatus)"
+}
+function error_message {
+    "$VMName is showing abnormal status to start command, current status is $(Get-Current-AzVMStatus), Requires further investigation"
+}
+function body {
+    @{title=$gotify_title;message=$status_message;priority=$gotify_priority}
+}
+function gotify_message_ok {
+    invoke-webrequest -uri $gotify_url -Method POST -Body $body
     Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
     StatusCode = [HttpStatusCode]::OK
     Body = $body
-        })
+    })
+}
+function gotify_message_error {
+    invoke-webrequest -uri $gotify_url -Method POST -Body @{title=$gotify_title;message=$error_message;priority=$gotify_priority}
+    Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
+    StatusCode = [HttpStatusCode]::ServiceUnavailable
+    Body = $body
+    })
+}
+
+if ($(Get-Current-AzVMStatus) -eq "VM running") {
+    Write-Host $message
+    Write-Host "VM is already running, no action taken"
     exit 0
 } else {
-    Start-AzVM -ResourceGroupName $rsgName -Name $vmName
+    start_vm
     Write-Host "VM is not running, attempting to start it, Sleeping for 20 seconds to allow VM to start"
     Start-Sleep -Seconds 20
-    $vm=((Get-AzVM -Name $vmName -ResourceGroupName $rsgName -Status))
-    Write-Host "$vmName status is $($vm.Statuses[1].DisplayStatus)"
-    if ($vm.Statuses[1].DisplayStatus -eq "VM starting" -or $vm.Statuses[1].DisplayStatus -eq "VM running") {
-        $message= "$vmName status is $($vm.Statuses[1].DisplayStatus)"
+    Write-Host $status_message
+    if ($(Get-Current-AzVMStatus) -eq "VM starting" -or $(Get-Current-AzVMStatus) -eq "VM running") {
         Write-Host $message
         Write-Host "VM is starting/Running, no action taken"
-        invoke-webrequest -uri $gotify_url -Method POST -Body @{title=$gotify_title;message=$message;priority=$gotify_priority}
-        Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
-        StatusCode = [HttpStatusCode]::OK
-        Body = $body
-        })
         exit 0
     } else {
         # if not running and not starting, then it's failed, as a last ditch effort, try to start it again
         # while also sending a notification to check the VM
-        Start-AzVM -ResourceGroupName $rsgName -Name $vmName
+        start_vm
         Start-Sleep -Seconds 20
-        $message= "$vmName is showing abnormal status to start command, current status is $(((Get-AzVM -Name $vmName -ResourceGroupName $rsgName -Status)).Statuses[1].DisplayStatus), Requires further investigation"
-        Write-Host $message
-        invoke-webrequest -uri $gotify_url -Method POST -Body @{title=$gotify_title;message=$message;priority=$gotify_priority}
-        # exit with error code 1 and http response code 503 to indicate service unavailable
-        Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
-        StatusCode = [HttpStatusCode]::ServiceUnavailable
-        Body = $body
-        })
+        Write-Host $error_message
+        gotify_message_errors
         exit 1
     }
 }
