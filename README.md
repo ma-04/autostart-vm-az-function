@@ -7,6 +7,10 @@
 ##Why the convulated mess with the variables?##
 Im still learning so not sure how to resolve some of the errors that were arising with new variable input not being used
 
+##How to use##
+1. Create a new Azure Function
+2. Create a new HTTP Trigger function
+3. Copy the code from the run.ps1 file into the function
 
 Inspired by
 http://web.archive.org/web/20230328044754/https://edi.wang/post/2020/6/18/use-azure-function-to-schedule-auto-start-for-vms

@@ -48,7 +48,7 @@ function gotify_message_error {
 }
 
 if ($(Get-Current-AzVMStatus) -eq "VM running") {
-    Write-Host $message
+    Write-Host $status_message
     Write-Host "VM is already running, no action taken"
     exit 0
 } else {
@@ -57,7 +57,7 @@ if ($(Get-Current-AzVMStatus) -eq "VM running") {
     Start-Sleep -Seconds 20
     Write-Host $status_message
     if ($(Get-Current-AzVMStatus) -eq "VM starting" -or $(Get-Current-AzVMStatus) -eq "VM running") {
-        Write-Host $message
+        Write-Host $status_message
         Write-Host "VM is starting/Running, no action taken"
         exit 0
     } else {
