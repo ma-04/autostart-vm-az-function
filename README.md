@@ -4,8 +4,6 @@
 #This is used to start a spot VM that is stopped due to low capacity#
 #This is triggered by a webhook, But can be triggered by a timer or queue if needed#
 
-##Why the convulated mess with the variables?##
-Im still learning so not sure how to resolve some of the errors that were arising with new variable input not being used
 
 ##How to use##
 1. Create a new Azure Function
