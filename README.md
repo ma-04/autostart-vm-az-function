@@ -31,15 +31,15 @@ This authorization method allows Azure resources to authorize each other within 
 ![image info](./images/3.permission.png)
 ![image info](./images/4.permission.png)
 
-Now go to your VM management screen, go to Access control (IAM) and select Add role assignment
+Now go to your VM management screen, go to Access control (IAM) and select Add > Role Assignment
 
 ![image info](./images/5.role.png)
 
-In the Role tab, Select Privilaged Administator roles, and select Owner, Then click next
+In the Role tab, Search and Select  Virtual Machine Contributor role, Then click next
 
-![image info](./images/6.owner.png)
+![image info](./images/6.vm_contributer.png)
 
-Go to Member and select the function app you created, and select your subscription, then select the function app you created
+Go to Member and after selecting Managed Identity select the function app you created, and select your subscription, then select the function app you created
 
 ![image info](./images/7.access.png)
 
