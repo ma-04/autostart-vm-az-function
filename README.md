@@ -3,8 +3,11 @@ This azure function is used to start a VM if it is not running, and send a notif
 
 This is used to start a spot VM that is stopped due to low capacity
 
-This is triggered by a webhook, But can be triggered by a timer or queue if needed
+This is triggered by a webhook, But can be triggered by a timer or queue if needed.
 
+## Note: 
+* Use run_http_trigger.ps1 for a webhook trigger, and run_timer_trigger.ps1 for a timer trigger
+* This is a simple example, and can be expanded to do more things, like starting multiple VMs, or sending notifications to multiple services, or even starting a VM on a schedule.
 
 # How to use
 ## Create Function App
@@ -47,15 +50,15 @@ And you are Done setting up permission, now u can edit the run.ps1 file in the f
 
 ## Function App Configuration
 
-Here we hav sevaral option to setup the function app, we can use a timer, a webhook, or a queue, in this example we will use a timer, but you can use a webhook if you want to trigger it from outside azure. A timer is the easiest way to trigger it, and you can set it to run every 5 minutes or so(High consumption of the function app will cost you more money), and it will check if the VM is running, if it is not running it will start it, and if it is running it will send a notification to gotify.
+Here we have sevaral option to setup the function app, we can use a timer, a webhook, or a queue, in this example we will use a timer, but you can use a webhook if you want to trigger it from outside azure. A timer is the easiest way to trigger it, and you can set it to run every 5 minutes or so(High consumption of the function app will cost you more money), and it will check if the VM is running, if it is not running it will start it, and if it is running it will send a notification to gotify.
 
-Go to the created Function App, and create a new Function, select timer trigger, and give it a name, and set the schedule to your liking, and click create
+Go to the created Function App, and create a new Function, select timer trigger or Http trigger, and give it a name, and set the schedule to your liking, and click create
 
 ![image info](./images/8.function-app.png)
 ![image info](./images/9.timer.png)
 ![image info](./images/10.code-test.png)
 
-And lastly go to code + test, and paste the code from run.ps1, and save it, and you are done, you can test it by clicking run, and you can see the logs in the log tab.
+And lastly go to code + test, and paste the code from either from run_http_trigger.ps1 or from run_timer_trigger.ps1 depending on your function app, and save it, and you are done, you can test it by clicking run, and you can see the logs in the log tab.
 
 Inspired by
 http://web.archive.org/web/20230328044754/https://edi.wang/post/2020/6/18/use-azure-function-to-schedule-auto-start-for-vms
