@@ -9,6 +9,38 @@ This is triggered by a webhook, But can be triggered by a timer or queue if need
 * Use run_http_trigger.ps1 for a webhook trigger, and run_timer_trigger.ps1 for a timer trigger
 * This is a simple example, and can be expanded to do more things, like starting multiple VMs, or sending notifications to multiple services, or even starting a VM on a schedule.
 
+
+## Environment Variables
+
+This function uses the following environment variables:
+
+- `SUBSCRIPTION_ID`: Your Azure subscription ID where the VMs are located
+- `VM_TO_START`: (Optional) The name of a specific VM to start if it's shut down. When set, the function will look for this VM across all resource groups in the subscription and start it if it's deallocated or stopped.
+
+### Manual VM Start Feature
+
+The function now supports starting a specific VM by setting the `VM_TO_START` environment variable. This is useful when you want to start a particular VM on-demand:
+
+1. Set the `VM_TO_START` environment variable to the name of your VM
+2. The function will search for the VM across all resource groups in the subscription
+3. If found and the VM is deallocated/stopped, it will be started
+4. The function logs the VM's current status and any actions taken
+
+Example: If you set `VM_TO_START=my-spot-vm`, the function will automatically start that VM if it's not running.
+
+### Configuration for Deployment
+
+When deploying to Azure, make sure to set these environment variables in your Function App's Application Settings:
+
+1. Go to your Function App in the Azure Portal
+2. Navigate to Settings > Environment Variables (or Configuration)
+3. Add the following application settings:
+   - `SUBSCRIPTION_ID`: Your Azure subscription ID
+   - `VM_TO_START`: The name of the VM you want to auto-start (optional)
+
+For local development, update the `local.settings.json` file with these values.
+
+
 # How to use
 ## Create Function App
 
