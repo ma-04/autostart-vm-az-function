@@ -1,6 +1,8 @@
 # Input bindings are passed in via param block.
 param($Timer)
 
+Write-Host "Timer trigger function started."
+
 # Get the current universal time in the default string format
 $currentUTCtime = (Get-Date).ToUniversalTime()
 
